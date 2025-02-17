@@ -26,7 +26,7 @@ python drag_ui.py
 
 ### Relocation:
 
-![relocation_gui](./assets//relocation_gui.png)
+![relocation_gui](./assets/relocation_gui.png)
 
 (1) 输入图片并进行LoRA微调；
 
@@ -40,7 +40,7 @@ python drag_ui.py
 
 ### Rotation:
 
-![rotation_gui](./rotation_gui.png)
+![rotation_gui](./assets/rotation_gui.png)
 
 (1)(2)(5)同上；
 
@@ -52,7 +52,7 @@ python drag_ui.py
 
 ### Rescaling:
 
-![rescaling_gui](./rescaling_gui.png)
+![rescaling_gui](./assets/rescaling_gui.png)
 
 (1)(2)(4)同上；
 
