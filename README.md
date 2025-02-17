@@ -26,7 +26,7 @@ python drag_ui.py
 
 ### Relocation:
 
-![relocation_gui](.assets//relocation_gui.png)
+![relocation_gui](./assets//relocation_gui.png)
 
 (1) 输入图片并进行LoRA微调；
 
