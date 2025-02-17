@@ -1,167 +1,90 @@
-<p align="center">
-  <h1 align="center">DragDiffusion: Harnessing Diffusion Models for Interactive Point-based Image Editing</h1>
-  <p align="center">
-    <a href="https://yujun-shi.github.io/"><strong>Yujun Shi</strong></a>
-    &nbsp;&nbsp;
-    <strong>Chuhui Xue</strong>
-    &nbsp;&nbsp;
-    <strong>Jun Hao Liew</strong>
-    &nbsp;&nbsp;
-    <strong>Jiachun Pan</strong>
-    &nbsp;&nbsp;
-    <br>
-    <strong>Hanshu Yan</strong>
-    &nbsp;&nbsp;
-    <strong>Wenqing Zhang</strong>
-    &nbsp;&nbsp;
-    <a href="https://vyftan.github.io/"><strong>Vincent Y. F. Tan</strong></a>
-    &nbsp;&nbsp;
-    <a href="https://songbai.site/"><strong>Song Bai</strong></a>
-  </p>
-  <br>
-  <div align="center">
-    <img src="./release-doc/asset/counterfeit-1.png", width="700">
-    <img src="./release-doc/asset/counterfeit-2.png", width="700">
-    <img src="./release-doc/asset/majix_realistic.png", width="700">
-  </div>
-  <div align="center">
-    <img src="./release-doc/asset/github_video.gif", width="700">
-  </div>
-  <p align="center">
-    <a href="https://arxiv.org/abs/2306.14435"><img alt='arXiv' src="https://img.shields.io/badge/arXiv-2306.14435-b31b1b.svg"></a>
-    <a href="https://yujun-shi.github.io/projects/dragdiffusion.html"><img alt='page' src="https://img.shields.io/badge/Project-Website-orange"></a>
-    <a href="https://twitter.com/YujunPeiyangShi"><img alt='Twitter' src="https://img.shields.io/twitter/follow/YujunPeiyangShi?label=%40YujunPeiyangShi"></a>
-  </p>
-  <br>
-</p>
-
-## Disclaimer
-This is a research project, NOT a commercial product.
-
-## News and Update
-* [Oct 23rd] Code and data of DragBench are released! Please check README under "drag_bench_evaluation" for details.
-* [Oct 16th] Integrate [FreeU](https://chenyangsi.top/FreeU/) when dragging generated image.
-* [Oct 3rd] Speeding up LoRA training when editing real images. (**Now only around 20s on A100!**)
-* [Sept 3rd] v0.1.0 Release.
-  * Enable **Dragging Diffusion-Generated Images.**
-  * Introducing a new guidance mechanism that **greatly improve quality of dragging results.** (Inspired by [MasaCtrl](https://ljzycmd.github.io/projects/MasaCtrl/))
-  * Enable Dragging Images with arbitrary aspect ratio
-  * Adding support for DPM++Solver (Generated Images)
-* [July 18th] v0.0.1 Release.
-  * Integrate LoRA training into the User Interface. **No need to use training script and everything can be conveniently done in UI!**
-  * Optimize User Interface layout.
-  * Enable using better VAE for eyes and faces (See [this](https://stable-diffusion-art.com/how-to-use-vae/))
-* [July 8th] v0.0.0 Release.
-  * Implement Basic function of DragDiffusion
-
 ## Installation
 
-It is recommended to run our code on a Nvidia GPU with a linux system. We have not yet tested on other configurations. Currently, it requires around 14 GB GPU memory to run our method. We will continue to optimize memory efficiency
-
-To install the required libraries, simply run the following command:
 ```
 conda env create -f environment.yaml
+```
+
+### 安装SAM:
+
+下载SAM的预训练文件(https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth)，将该文件放至./segment-anything-main/ckpts文件夹下。
+
+通过以下方式在dragdiff环境中安装segment_anything模块包：
+
+```
 conda activate dragdiff
+cd ./segment-anything-main
+pip install -e .
 ```
 
-## Run DragDiffusion
-To start with, in command line, run the following to start the gradio user interface:
+
+
+## Gradio Demo
+
 ```
-python3 drag_ui.py
-```
-
-You may check our [GIF above](https://github.com/Yujun-Shi/DragDiffusion/blob/main/release-doc/asset/github_video.gif) that demonstrate the usage of UI in a step-by-step manner.
-
-Basically, it consists of the following steps:
-
-### Case 1: Dragging Input Real Images
-#### 1) train a LoRA
-* Drop our input image into the left-most box.
-* Input a prompt describing the image in the "prompt" field
-* Click the "Train LoRA" button to train a LoRA given the input image
-
-#### 2) do "drag" editing
-* Draw a mask in the left-most box to specify the editable areas.
-* Click handle and target points in the middle box. Also, you may reset all points by clicking "Undo point".
-* Click the "Run" button to run our algorithm. Edited results will be displayed in the right-most box.
-
-### Case 2: Dragging Diffusion-Generated Images
-#### 1) generate an image
-* Fill in the generation parameters (e.g., positive/negative prompt, parameters under Generation Config & FreeU Parameters).
-* Click "Generate Image".
-
-#### 2) do "drag" on the generated image
-* Draw a mask in the left-most box to specify the editable areas
-* Click handle points and target points in the middle box.
-* Click the "Run" button to run our algorithm. Edited results will be displayed in the right-most box.
-
-
-<!---
-## Explanation for parameters in the user interface:
-#### General Parameters
-|Parameter|Explanation|
-|-----|------|
-|prompt|The prompt describing the user input image (This will be used to train the LoRA and conduct "drag" editing).|
-|lora_path|The directory where the trained LoRA will be saved.|
-
-
-#### Algorithm Parameters
-These parameters are collapsed by default as we normally do not have to tune them. Here are the explanations:
-* Base Model Config
-
-|Parameter|Explanation|
-|-----|------|
-|Diffusion Model Path|The path to the diffusion models. By default we are using "runwayml/stable-diffusion-v1-5". We will add support for more models in the future.|
-|VAE Choice|The Choice of VAE. Now there are two choices, one is "default", which will use the original VAE. Another choice is "stabilityai/sd-vae-ft-mse", which can improve results on images with human eyes and faces (see [explanation](https://stable-diffusion-art.com/how-to-use-vae/))|
-
-* Drag Parameters
-
-|Parameter|Explanation|
-|-----|------|
-|n_pix_step|Maximum number of steps of motion supervision. **Increase this if handle points have not been "dragged" to desired position.**|
-|lam|The regularization coefficient controlling unmasked region stays unchanged. Increase this value if the unmasked region has changed more than what was desired (do not have to tune in most cases).|
-|n_actual_inference_step|Number of DDIM inversion steps performed (do not have to tune in most cases).|
-
-* LoRA Parameters
-
-|Parameter|Explanation|
-|-----|------|
-|LoRA training steps|Number of LoRA training steps (do not have to tune in most cases).|
-|LoRA learning rate|Learning rate of LoRA (do not have to tune in most cases)|
-|LoRA rank|Rank of the LoRA (do not have to tune in most cases).|
-
---->
-
-## License
-Code related to the DragDiffusion algorithm is under Apache 2.0 license.
-
-
-## BibTeX
-If you find our repo helpful, please consider leaving a star or cite our paper :)
-```bibtex
-@article{shi2023dragdiffusion,
-  title={DragDiffusion: Harnessing Diffusion Models for Interactive Point-based Image Editing},
-  author={Shi, Yujun and Xue, Chuhui and Pan, Jiachun and Zhang, Wenqing and Tan, Vincent YF and Bai, Song},
-  journal={arXiv preprint arXiv:2306.14435},
-  year={2023}
-}
+python drag_ui.py
 ```
 
-## Contact
-For any questions on this project, please contact [Yujun](https://yujun-shi.github.io/) (shi.yujun@u.nus.edu)
+### Relocation:
 
-## Acknowledgement
-This work is inspired by the amazing [DragGAN](https://vcai.mpi-inf.mpg.de/projects/DragGAN/). The lora training code is modified from an [example](https://github.com/huggingface/diffusers/blob/v0.17.1/examples/dreambooth/train_dreambooth_lora.py) of diffusers. Image samples are collected from [unsplash](https://unsplash.com/), [pexels](https://www.pexels.com/zh-cn/), [pixabay](https://pixabay.com/). Finally, a huge shout-out to all the amazing open source diffusion models and libraries.
+![relocation_gui](./relocation_gui.png)
 
-## Related Links
-* [Drag Your GAN: Interactive Point-based Manipulation on the Generative Image Manifold](https://vcai.mpi-inf.mpg.de/projects/DragGAN/)
-* [MasaCtrl: Tuning-free Mutual Self-Attention Control for Consistent Image Synthesis and Editing](https://ljzycmd.github.io/projects/MasaCtrl/)
-* [Emergent Correspondence from Image Diffusion](https://diffusionfeatures.github.io/)
-* [DragonDiffusion: Enabling Drag-style Manipulation on Diffusion Models](https://mc-e.github.io/project/DragonDiffusion/)
-* [FreeDrag: Point Tracking is Not You Need for Interactive Point-based Image Editing](https://lin-chen.site/projects/freedrag/)
+(1) 输入图片并进行LoRA微调；
+
+(2) 借助SAM模型，输入Segment Prompt(如Positive point，Negative point，Box)进行编辑区域的分割；
+
+(3) 指定drag的起点与终点位置；
+
+(4) 执行drag编辑。
 
 
-## Common Issues and Solutions
-1) For users struggling in loading models from huggingface due to internet constraint, please 1) follow this [links](https://zhuanlan.zhihu.com/p/475260268) and download the model into the directory "local\_pretrained\_models"; 2) Run "drag\_ui.py" and select the directory to your pretrained model in "Algorithm Parameters -> Base Model Config -> Diffusion Model Path".
 
+### Rotation:
+
+![rotation_gui](./rotation_gui.png)
+
+(1)(2)(5)同上；
+
+(3) 自定义三维椭圆的大小以及初始位置，包括其中心点的xy坐标，椭圆x轴和y轴的长度，以及绕y轴或z轴的初始旋转角度；
+
+(4) 指定Drag点，指定旋转轴的三维向量(方向)，旋转角度，以及旋转轴的二维坐标，然后进行椭圆的旋转。
+
+
+
+### Rescaling:
+
+![rescaling_gui](./rescaling_gui.png)
+
+(1)(2)(4)同上；
+
+(3) 选择缩放类型为整体(Entirety)或局部(Part)，如果是整体，需要指定缩放中心和缩放比例；如果是局部，需要在图中指定drag的起点和终点位置。
+
+
+
+## Evaluation
+
+DragBench数据集原始数据位于./drag_bench_evaluation/drag_bench_data，此外，针对我们的方法，需要先对该数据集进行一些预处理，预处理数据位于./drag_bench_evaluation/drag_bench_data_preprocess_result_better。以下是模型评估流程：
+
+### (1) 分别针对每个样本训练LoRA:
+
+```
+cd ./drag_bench_evaluation
+python run_lora_training.py
+```
+
+生成的所有LoRA文件将位于./drag_bench_evaluation/drag_bench_lora。
+
+### (2) 利用GDrag完成对每个样本的Drag编辑:
+
+```
+cd ./drag_bench_evaluation
+python run_drag_diffusion_GDrag.py
+```
+
+### (3) 评估生成结果的质量:
+
+```
+cd ./drag_bench_evaluation
+python run_eval_point_matching.py --eval_root results_dir      # 评估Distance指标
+python run_eval_similarity.py --eval_root results_dir          # 评估Lpips指标
+```
 
