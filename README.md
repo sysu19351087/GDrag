@@ -6,7 +6,7 @@ conda env create -f environment.yaml
 
 ### 安装SAM:
 
-下载SAM的预训练文件(https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth)， 将该文件放至./segment-anything-main/ckpts文件夹下。
+下载SAM的预训练文件( https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth )，将该文件放至./segment-anything-main/ckpts文件夹下。
 
 通过以下方式在dragdiff环境中安装segment_anything模块包：
 
